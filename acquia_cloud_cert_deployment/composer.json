@@ -2,8 +2,8 @@
     "name": "vagrant/acquia_cloud_cert_deployment",
     "type": "project",
     "require": {
-        "nategood/commando": "^0.3.0",
-        "acquia/http-hmac-php": "^4.0",
-        "guzzlehttp/guzzle": "^6.3"
+        "nategood/commando": "*",
+        "guzzlehttp/guzzle": "^6.3",
+        "league/oauth2-client": "^2.8"
     }
 }
