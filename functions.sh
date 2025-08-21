@@ -5,21 +5,21 @@
 # * ENVIRONMENT
 
 # Build up all required variables.
-DRUSH_ALIAS="@${PROJECT}.${ENVIRONMENT}"
+DRUSH_ALIAS="@${AH_SITE_GROUP}.${AH_SITE_ENVIRONMENT}"
 # Project root is a known path on Acquia Cloud.
-PROJECT_ROOT="/var/www/html/${PROJECT}.${ENVIRONMENT}"
-FILE_CONFIG=${PROJECT_ROOT}/letsencrypt_drupal/config_${PROJECT}.${ENVIRONMENT}.sh
+PROJECT_ROOT="/var/www/html/${AH_SITE_GROUP}.${AH_SITE_ENVIRONMENT}"
+FILE_CONFIG=${PROJECT_ROOT}/letsencrypt_drupal/config_${AH_SITE_GROUP}.${AH_SITE_ENVIRONMENT}.sh
 DIRECTORY_DEHYDRATED_CONFIG=${PROJECT_ROOT}/letsencrypt_drupal/dehydrated
-FILE_DOMAINSTXT=${PROJECT_ROOT}/letsencrypt_drupal/domains_${PROJECT}.${ENVIRONMENT}.txt
+FILE_DOMAINSTXT=${PROJECT_ROOT}/letsencrypt_drupal/domains_${AH_SITE_GROUP}.${AH_SITE_ENVIRONMENT}.txt
 DEHYDRATED="https://github.com/dehydrated-io/dehydrated.git"
 CERT_DIR=~/.letsencrypt_drupal
 TMP_DIR=/tmp/letsencrypt_drupal
 FILE_BASECONFIG=${TMP_DIR}/baseconfig
 
 # Detect core version
-DRUPAL_VERSION="9"
-if grep -q -r -i --include Drupal.php "const version" ${PROJECT_ROOT}; then DRUPAL_VERSION="8"; fi
-if grep -q -r -i --include bootstrap.inc "define('VERSION', '" ${PROJECT_ROOT}; then DRUPAL_VERSION="7"; fi
+DRUPAL_VERSION="10"
+#if grep -q -r -i --include Drupal.php "const version" ${PROJECT_ROOT}; then DRUPAL_VERSION="8"; fi
+#if grep -q -r -i --include bootstrap.inc "define('VERSION', '" ${PROJECT_ROOT}; then DRUPAL_VERSION="7"; fi
 
 # Load all variables provided by the project.
 . ${FILE_CONFIG}
@@ -101,6 +101,13 @@ drush_set_challenge()
     echo "$TOKEN_VALUE" | drush9 ${DRUSH_ALIAS} sset -y --uri=${DOMAIN} letsencrypt_challenge.challenge -
     echo "EXECUTING: drush9 ${DRUSH_ALIAS} sset -y --uri=${DOMAIN} letsencrypt_challenge.challenge.${DOMAIN} \"${TOKEN_VALUE}\""
     echo "$TOKEN_VALUE" | drush9 ${DRUSH_ALIAS} sset -y --uri=${DOMAIN} letsencrypt_challenge.challenge.${DOMAIN} -
+  elif [[ "${DRUPAL_VERSION}" == "10" ]]; then
+    echo "EXECUTING: drush ${DRUSH_ALIAS} en -y --uri=${DOMAIN} letsencrypt_challenge"
+    drush ${DRUSH_ALIAS} en -y --uri=${DOMAIN} letsencrypt_challenge
+    echo "EXECUTING: drush ${DRUSH_ALIAS} sset -y --uri=${DOMAIN} letsencrypt_challenge.challenge \"${TOKEN_VALUE}\""
+    echo "$TOKEN_VALUE" | drush ${DRUSH_ALIAS} sset -y --uri=${DOMAIN} letsencrypt_challenge.challenge -
+    echo "EXECUTING: drush ${DRUSH_ALIAS} sset -y --uri=${DOMAIN} letsencrypt_challenge.challenge.${DOMAIN} \"${TOKEN_VALUE}\""
+    echo "$TOKEN_VALUE" | drush ${DRUSH_ALIAS} sset -y --uri=${DOMAIN} letsencrypt_challenge.challenge.${DOMAIN} -
   fi
 }
 
@@ -121,5 +128,8 @@ drush_clean_challenge()
   elif [[ "${DRUPAL_VERSION}" == "9" ]]; then
     echo "EXECUTING: drush9 ${DRUSH_ALIAS} pmu -y --uri=${DOMAIN} letsencrypt_challenge"
     drush9 ${DRUSH_ALIAS} pmu -y --uri=${DOMAIN} letsencrypt_challenge
+  elif [[ "${DRUPAL_VERSION}" == "10" ]]; then
+    echo "EXECUTING: drush ${DRUSH_ALIAS} pmu -y --uri=${DOMAIN} letsencrypt_challenge"
+    drush ${DRUSH_ALIAS} pmu -y --uri=${DOMAIN} letsencrypt_challenge
   fi
 }

@@ -1,14 +1,15 @@
 #!/usr/bin/env php
 <?php
 
-require_once 'vendor/autoload.php';
+// This example requires `league/oauth2-client` package.
+// Run `composer require league/oauth2-client` before running.
+require __DIR__ . '/vendor/autoload.php';
 
-use Acquia\Hmac\Guzzle\HmacAuthMiddleware;
-use Acquia\Hmac\Key;
+use League\OAuth2\Client\Provider\GenericProvider;
 use GuzzleHttp\Client;
-use GuzzleHttp\HandlerStack;
 use Commando\Command;
 use GuzzleHttp\Exception\ClientException;
+
 
 $cmd = new Commando\Command();
 
@@ -58,30 +59,6 @@ $timestamp_formatted = gmdate('c', $timestamp);
 
 $secrets = extract_secrets($cmd);
 
-// Create the HTTP HMAC key.
-$key = new Key($secrets['token'], $secrets['secret']);
-
-// Optionally, you can provide additional headers when generating the signature.
-// The header keys need to be provided to the middleware below.
-$headers = [];
-
-// Specify the API's realm.
-// Consult the API documentation for this value.
-$realm = 'Acquia';
-
-// Create a Guzzle middleware to handle authentication during all requests.
-// Provide your key, realm and the names of any additional custom headers.
-$middleware = new HmacAuthMiddleware($key, $realm, array_keys($headers));
-
-// Register the middleware.
-$stack = HandlerStack::create();
-$stack->push($middleware);
-
-// Create a client.
-$client = new Client([
-  'handler' => $stack,
-]);
-
 $base_url = 'https://cloud.acquia.com/api/';
 // Create label beforehand, so it can be used at multiple places.
 if ($label_prefix = $cmd['label-prefix']) {
@@ -90,18 +67,54 @@ if ($label_prefix = $cmd['label-prefix']) {
   $label = "cert_{$timestamp_formatted}";
 }
 
-// Request.
+// See https://docs.acquia.com/cloud-platform/develop/api/auth/
+// for how to generate a client ID and Secret.
+$clientId = $secrets['token'];
+$clientSecret = $secrets['secret'];
+
+$provider = new GenericProvider([
+    'clientId'                => $clientId,
+    'clientSecret'            => $clientSecret,
+    'urlAuthorize'            => '',
+    'urlAccessToken'          => 'https://accounts.acquia.com/api/auth/oauth/token',
+    'urlResourceOwnerDetails' => '',
+]);
+
 try {
 
-  $api_method = "environments/{$environment_id}/ssl/certificates";
-  $response = $client->request('POST', $base_url . $api_method, [
-    'form_params' => [
-      'certificate' => file_get_contents($full_certificate_chain_path),
-      'private_key' => file_get_contents($keyfile_path),
-      'ca_certificates' => file_get_contents($intermediate_certificates),
-      'label' => $label,
-    ],
-  ]);
+    $api_method = "environments/{$environment_id}/ssl/certificates";
+
+    // Try to get an access token using the client credentials grant.
+    echo 'retrieving access token', PHP_EOL;
+    $accessToken = $provider->getAccessToken('client_credentials');
+    echo 'access token retrieved', PHP_EOL;
+
+    $body = json_encode([
+        'legacy' => false,
+        'certificate' => file_get_contents($full_certificate_chain_path),
+        'private_key' => file_get_contents($keyfile_path),
+        'ca_certificates' => file_get_contents($intermediate_certificates),
+        'label' => $label,
+    ]);
+
+    // Generate a request object using the access token.
+    $request = $provider->getAuthenticatedRequest(
+        'POST',
+        $base_url . $api_method,
+        $accessToken,
+        [
+            'headers' => ['Content-Type' => 'application/json'],
+            'body' => $body
+
+        ]
+    );
+
+    // Send the request.
+    $client = new Client();
+    $response = $client->send($request);
+
+    $responseBody = $response->getBody();
+
 } catch (ClientException $e) {
     print $e->getMessage();
     print_response_message($e->getResponse(), $cmd);
@@ -111,7 +124,7 @@ print_response_message($response->getBody(), $cmd);
 
 if ($response->getStatusCode() == 202 && $cmd['activate']) {
   // Get all  certificates
-  $certificates = get_deployed_certificates($environment_id, $client, $base_url, $cmd);
+  $certificates = get_deployed_certificates($environment_id, $client, $base_url, $cmd, $provider, $accessToken);
   // Activate it
   // Loop through the certificates, get ID of the one which has the same Label as the current one
   if (is_array($certificates)) {
@@ -121,7 +134,7 @@ if ($response->getStatusCode() == 202 && $cmd['activate']) {
         // Request.
         try {
           $api_method = "environments/{$environment_id}/ssl/certificates/{$cert_id}/actions/activate";
-          $response = $client->request('POST', $base_url . $api_method, []);
+          $response = $client->send($provider->getAuthenticatedRequest('POST', $base_url . $api_method, $accessToken, []));
         } catch (ClientException $e) {
             print $e->getMessage();
             print_response_message($e->getResponse(), $cmd);
@@ -166,11 +179,11 @@ function extract_secrets($cmd) {
  *
  * @return array
  */
-function get_deployed_certificates($environment_id, $client, $base_url, $cmd) {
+function get_deployed_certificates($environment_id, $client, $base_url, $cmd, $provider, $accessToken) {
   // Request.
   try {
     $api_method = "environments/{$environment_id}/ssl/certificates";
-    $response = $client->request('GET', $base_url . $api_method, []);
+    $response = $client->send($provider->getAuthenticatedRequest('GET', $base_url . $api_method, $accessToken, []));
   } catch (ClientException $e) {
         $cmd->error($e->getMessage());
   }
@@ -191,10 +204,16 @@ function get_deployed_certificates($environment_id, $client, $base_url, $cmd) {
  * @param $cmd
  */
 function print_response_message($response_body, $cmd) {
+  // If it's a Response object, extract the body content
+  if ($response_body instanceof \Psr\Http\Message\ResponseInterface) {
+    $response_body = $response_body->getBody()->getContents();
+  }
+
   $response_body = json_decode($response_body, TRUE);
 
   if (array_key_exists('error', $response_body)) {
-    $cmd->error(new Exception($response_body['message']));
+    $message = is_array($response_body['message']) ? json_encode($response_body['message']) : $response_body['message'];
+    $cmd->error(new Exception($message));
   }
 
   print $response_body['message'] . PHP_EOL;
