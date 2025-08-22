@@ -59,7 +59,7 @@ $cmd->option()
   ->referredToAs('DOMAIN')
   ->expectsFile();
 
-list($environment_id, $keyfile_path, $full_certificate_chain_path, $intermediate_certificates, $timestamp) = $cmd;
+list($environment_id, $keyfile_path, $full_certificate_chain_path, $intermediate_certificates, $timestamp, $domain) = $cmd;
 
 // Format timestamp as ISO 8601 date
 $timestamp_formatted = gmdate('c', $timestamp);
