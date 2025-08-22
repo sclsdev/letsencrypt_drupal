@@ -52,6 +52,13 @@ $cmd->option("p")
   ->aka('label-prefix')
   ->describedAs('Optionally specify a label prefix. Defaults to \'cert\'');
 
+$cmd->option()
+  ->require()
+  ->aka('domain')
+  ->describedAs('Domain name')
+  ->referredToAs('DOMAIN')
+  ->expectsFile();
+
 list($environment_id, $keyfile_path, $full_certificate_chain_path, $intermediate_certificates, $timestamp) = $cmd;
 
 // Format timestamp as ISO 8601 date
@@ -62,7 +69,7 @@ $secrets = extract_secrets($cmd);
 $base_url = 'https://cloud.acquia.com/api/';
 // Create label beforehand, so it can be used at multiple places.
 if ($label_prefix = $cmd['label-prefix']) {
-    $label = "{$label_prefix}_{$timestamp_formatted}";
+    $label = "{$label_prefix}_{$timestamp_formatted}_{$cmd['domain']}";
 } else {
   $label = "cert_{$timestamp_formatted}";
 }
