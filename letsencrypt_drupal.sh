@@ -31,7 +31,7 @@ self_update() {
     reslog=$(git log HEAD..origin/master --oneline)
     if [[ "${reslog}" != "" ]]; then
         echo "Found a new version of me, updating myself..."
-        slackpost "${PROJECT_ROOT}" "warning" "Morpht/letsencrypt_drupal on ${DRUSH_ALIAS}" "Found a new version of me, updating myself..."
+        slackpost "${PROJECT_ROOT}" "warning" "Sclsdev/letsencrypt_drupal on ${DRUSH_ALIAS}" "Found a new version of me, updating myself..."
 
         # Remove dehydrated library to make sure we get new version.
         rm -rf ${CURRENT_DIR}/dehydrated
@@ -95,8 +95,8 @@ main() {
   echo 'HOOK_CHAIN="no"' >> ${FILE_BASECONFIG}
   echo 'CONFIG_D="'${DIRECTORY_DEHYDRATED_CONFIG}'"' >> ${FILE_BASECONFIG}
 
-  echo "EXECUTING: ${CURRENT_DIR}/dehydrated/dehydrated --config ${FILE_BASECONFIG} --cron --accept-terms --force"
-  DEHYDRATED_RESULT=$(${CURRENT_DIR}/dehydrated/dehydrated --config ${FILE_BASECONFIG} --cron --accept-terms --force 2>&1)
+  echo "EXECUTING: ${CURRENT_DIR}/dehydrated/dehydrated --config ${FILE_BASECONFIG} --cron --accept-terms --ca letsencrypt-test"
+  DEHYDRATED_RESULT=$(${CURRENT_DIR}/dehydrated/dehydrated --config ${FILE_BASECONFIG} --cron --accept-terms --ca letsencrypt-test 2>&1)
   if [ $? -eq 0 ]
   then
     # Send result to slack.
