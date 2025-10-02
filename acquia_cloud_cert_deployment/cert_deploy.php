@@ -54,10 +54,8 @@ $cmd->option("p")
 
 $cmd->option()
   ->require()
-  ->aka('domain')
   ->describedAs('Domain name')
-  ->referredToAs('DOMAIN')
-  ->expectsFile();
+  ->referredToAs('DOMAIN');
 
 list($environment_id, $keyfile_path, $full_certificate_chain_path, $intermediate_certificates, $timestamp, $domain) = $cmd;
 
@@ -69,7 +67,7 @@ $secrets = extract_secrets($cmd);
 $base_url = 'https://cloud.acquia.com/api/';
 // Create label beforehand, so it can be used at multiple places.
 if ($label_prefix = $cmd['label-prefix']) {
-    $label = "{$label_prefix}_{$timestamp_formatted}_{$cmd['domain']}";
+    $label = "{$label_prefix}_{$timestamp_formatted}_{$domain}";
 } else {
   $label = "cert_{$timestamp_formatted}";
 }
