@@ -28,7 +28,7 @@ CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 self_update() {
     cd $CURRENT_DIR || exit
     #git fetch origin
-    reslog=$(git log HEAD..origin/master --oneline)
+    reslog=$(git log HEAD..origin/main --oneline)
     if [[ "${reslog}" != "" ]]; then
         echo "Found a new version of me, updating myself..."
         slackpost "${PROJECT_ROOT}" "warning" "Sclsdev/letsencrypt_drupal on ${DRUSH_ALIAS}" "Found a new version of me, updating myself..."
@@ -57,7 +57,7 @@ self_update() {
     cd ${CURRENT_DIR} || exit
 
     echo "Already the latest version."
-    slackpost "${PROJECT_ROOT}" "good" "Morpht/letsencrypt_drupal on ${DRUSH_ALIAS}" "The script is already the latest version."
+    slackpost "${PROJECT_ROOT}" "good" "Sclsdev/letsencrypt_drupal on ${DRUSH_ALIAS}" "The script is already the latest version."
 }
 
 main() {
