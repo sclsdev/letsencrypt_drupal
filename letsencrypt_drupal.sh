@@ -27,7 +27,7 @@ CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 self_update() {
     cd $CURRENT_DIR || exit
-    #git fetch origin
+    git fetch origin
     reslog=$(git log HEAD..origin/main --oneline)
     if [[ "${reslog}" != "" ]]; then
         echo "Found a new version of me, updating myself..."
