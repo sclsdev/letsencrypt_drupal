@@ -74,6 +74,8 @@ These steps are for `prod` environment of PROJECT on Acquia Cloud. Can be easily
       * Should be placed on Acquia server here: `/mnt/files/PROJECT.prod/secrets.settings.php`
   * Add https://www.drupal.org/project/letsencrypt_challenge module.
     * `composer require drupal/letsencrypt_challenge`
+  * If deploying to development/stage, set sites using the Shield module to exclude this path:
+    * /.well-known/acme-challenge/*
   * Commit and deploy to production.
 * In Acquia UI add the Scheduled task
   * Running the task often is not a problem.
