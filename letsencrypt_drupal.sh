@@ -70,9 +70,9 @@ main() {
     git clone ${DEHYDRATED} ${CURRENT_DIR}/dehydrated
 
     if [ $? -eq 0 ]; then
-      logline "Successfully clonned ${DEHYDRATED}";
+      logline "Successfully cloned ${DEHYDRATED}";
     else
-      logline "Error clonning ${DEHYDRATED}";
+      logline "Error cloning ${DEHYDRATED}";
       exit 1
     fi
 
