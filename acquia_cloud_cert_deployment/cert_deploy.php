@@ -90,9 +90,7 @@ try {
     $api_method = "environments/{$environment_id}/ssl/certificates";
 
     // Try to get an access token using the client credentials grant.
-    echo 'retrieving access token', PHP_EOL;
     $accessToken = $provider->getAccessToken('client_credentials');
-    echo 'access token retrieved', PHP_EOL;
 
     $body = json_encode([
         'legacy' => false,
