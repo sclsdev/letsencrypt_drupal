@@ -73,11 +73,24 @@ cd_or_exit()
 }
 
 #---------------------------------------------------------------------
+normalize_domain() {
+  local domain="$1"
+  # If it's a root domain (no subdomain), prepend "www."
+  if [[ "$domain" != *.*.* ]]; then
+    echo "www.${domain}"
+  else
+    echo "$domain"
+  fi
+}
+
+#---------------------------------------------------------------------
 drush_set_challenge()
 {
   DRUSH_ALIAS="${1}"
   DRUPAL_VERSION="${2}"
-  DOMAIN="${3}"
+  RAW_DOMAIN="${3}"
+  DOMAIN=$(normalize_domain "$RAW_DOMAIN")
+  logline "Normalized domain: ${DOMAIN} (original: ${RAW_DOMAIN})"
   TOKEN_VALUE="${4}"
 
   if [[ "${DRUPAL_VERSION}" == "7" ]]; then
@@ -115,7 +128,9 @@ drush_clean_challenge()
 {
   DRUSH_ALIAS="${1}"
   DRUPAL_VERSION="${2}"
-  DOMAIN="${3}"
+  RAW_DOMAIN="${3}"
+  DOMAIN=$(normalize_domain "$RAW_DOMAIN")
+  logline "Normalized domain: ${DOMAIN} (original: ${RAW_DOMAIN})"
 
   if [[ "${DRUPAL_VERSION}" == "7" ]]; then
     echo "EXECUTING: drush8 ${DRUSH_ALIAS} dis -y --uri=${DOMAIN} letsencrypt_challenge"
