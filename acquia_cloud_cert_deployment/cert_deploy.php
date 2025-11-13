@@ -198,7 +198,7 @@ function get_deployed_certificates($environment_id, $client, $base_url, $cmd, $p
       $certificates_map[$item['id']] = [
         'label' => $item['label'],
         'expires_at' => $item['expires_at'], // ISO 8601 format
-        'status' => $item['status'], // Optional: to check if already inactive
+        'active' => $item['flags']['active'], // Optional: to check if already inactive
       ];
     }
   }
@@ -210,22 +210,27 @@ function get_deployed_certificates($environment_id, $client, $base_url, $cmd, $p
  */
 
 function deactivate_expired_certificates($environment_id, $certificates, $client, $base_url, $cmd, $provider, $accessToken) {
-  $now = new DateTimeImmutable('now', new DateTimeZone('UTC'));
+    $now = new DateTimeImmutable('now', new DateTimeZone('UTC'));
 
-  foreach ($certificates as $cert_id => $meta) {
-    $expires_at = new DateTimeImmutable($meta['expires_at'], new DateTimeZone('UTC'));
+    foreach ($certificates as $cert_id => $meta) {
+        if (!empty($meta['expires_at']) && !empty($meta['active']) && $meta['active'] === true) {
+            $expires_at = new DateTimeImmutable($meta['expires_at'], new DateTimeZone('UTC'));
 
-    if ($expires_at < $now) {
-      try {
-        $api_method = "environments/{$environment_id}/ssl/certificates/{$cert_id}/actions/deactivate";
-        $response = $client->send($provider->getAuthenticatedRequest('POST', $base_url . $api_method, $accessToken, []));
-        print_response_message($response->getBody(), $cmd);
-      } catch (ClientException $e) {
-        print $e->getMessage();
-        print_response_message($e->getResponse(), $cmd);
-      }
+            if ($expires_at < $now) {
+                try {
+                    $api_method = "environments/{$environment_id}/ssl/certificates/{$cert_id}/actions/deactivate";
+                    $response = $client->send($provider->getAuthenticatedRequest('POST', $base_url . $api_method, $accessToken, []));
+                    print_response_message($response->getBody(), $cmd);
+                } catch (ClientException $e) {
+                    print $e->getMessage();
+                    print_response_message($e->getResponse(), $cmd);
+                }
+            }
+        }
+        else {
+            error_log("Skipping certificate (ID: {$cert_id}, Label: '{$meta['label']}') — not expired or already inactive");
+        }
     }
-  }
 }
 
 /**
