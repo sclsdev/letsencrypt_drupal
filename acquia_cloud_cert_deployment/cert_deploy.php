@@ -116,37 +116,36 @@ try {
     $client = new Client();
     $response = $client->send($request);
 
-    //$responseBody = $response->getBody();
-    print_response_message($response->getBody(), $cmd);
+    $responseBody = $response->getBody();
 
-    if ($response->getStatusCode() == 202 && $cmd['activate']) {
-      // Get all  certificates
-      $certificates = get_deployed_certificates($environment_id, $client, $base_url, $cmd, $provider, $accessToken);
-      // Activate it
-      // Loop through the certificates, get ID of the one which has the same Label as the current one
-      if (is_array($certificates)) {
-        foreach ($certificates as $cert_id => $cert_label) {
-          // $label is the label of currently deployed certificate
-          if ($label === $cert_label) {
-            // Request.
-            try {
-              $api_method = "environments/{$environment_id}/ssl/certificates/{$cert_id}/actions/activate";
-              $response = $client->send($provider->getAuthenticatedRequest('POST', $base_url . $api_method, $accessToken, []));
-            } catch (ClientException $e) {
-                print $e->getMessage();
-                print_response_message($e->getResponse(), $cmd);
-            }
-            print_response_message($response->getBody(), $cmd);
-          }
-        }
-      }
-
-      // Deactivate expired certificates
-      deactivate_expired_certificates($environment_id, $certificates, $client, $base_url, $cmd, $provider, $accessToken);
-    }
 } catch (ClientException $e) {
     print $e->getMessage();
     print_response_message($e->getResponse(), $cmd);
+}
+
+print_response_message($response->getBody(), $cmd);
+
+if ($response->getStatusCode() == 202 && $cmd['activate']) {
+  // Get all  certificates
+  $certificates = get_deployed_certificates($environment_id, $client, $base_url, $cmd, $provider, $accessToken);
+  // Activate it
+  // Loop through the certificates, get ID of the one which has the same Label as the current one
+  if (is_array($certificates)) {
+    foreach ($certificates as $cert_id => $cert_label) {
+      // $label is the label of currently deployed certificate
+      if ($label === $cert_label) {
+        // Request.
+        try {
+          $api_method = "environments/{$environment_id}/ssl/certificates/{$cert_id}/actions/activate";
+          $response = $client->send($provider->getAuthenticatedRequest('POST', $base_url . $api_method, $accessToken, []));
+        } catch (ClientException $e) {
+            print $e->getMessage();
+            print_response_message($e->getResponse(), $cmd);
+        }
+        print_response_message($response->getBody(), $cmd);
+      }
+    }
+  }
 }
 
 /**
@@ -192,45 +191,13 @@ function get_deployed_certificates($environment_id, $client, $base_url, $cmd, $p
         $cmd->error($e->getMessage());
   }
 
-  $certificates_map = [];
   if ($deployed_certificates = json_decode($response->getBody(), TRUE)) {
+    $certificates_map = [];
     foreach ($deployed_certificates['_embedded']['items'] as $item) {
-      $certificates_map[$item['id']] = [
-        'label' => $item['label'],
-        'expires_at' => $item['expires_at'], // ISO 8601 format
-        'active' => $item['flags']['active'], // Optional: to check if already inactive
-      ];
+      $certificates_map[$item['id']] = $item['label'];
     }
+    return $certificates_map;
   }
-  return $certificates_map;
-}
-
-/**
- * Deactivate certificates that are expired on Acquia Cloud
- */
-
-function deactivate_expired_certificates($environment_id, $certificates, $client, $base_url, $cmd, $provider, $accessToken) {
-    $now = new DateTimeImmutable('now', new DateTimeZone('UTC'));
-
-    foreach ($certificates as $cert_id => $meta) {
-        if (!empty($meta['expires_at']) && !empty($meta['active']) && $meta['active'] === true) {
-            $expires_at = new DateTimeImmutable($meta['expires_at'], new DateTimeZone('UTC'));
-
-            if ($expires_at < $now) {
-                try {
-                    $api_method = "environments/{$environment_id}/ssl/certificates/{$cert_id}/actions/deactivate";
-                    $response = $client->send($provider->getAuthenticatedRequest('POST', $base_url . $api_method, $accessToken, []));
-                    print_response_message($response->getBody(), $cmd);
-                } catch (ClientException $e) {
-                    print $e->getMessage();
-                    print_response_message($e->getResponse(), $cmd);
-                }
-            }
-        }
-        else {
-            error_log("Skipping certificate (ID: {$cert_id}, Label: '{$meta['label']}') — not expired or already inactive");
-        }
-    }
 }
 
 /**
