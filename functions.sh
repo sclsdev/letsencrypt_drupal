@@ -128,9 +128,7 @@ drush_clean_challenge()
 {
   DRUSH_ALIAS="${1}"
   DRUPAL_VERSION="${2}"
-  RAW_DOMAIN="${3}"
-  DOMAIN=$(normalize_domain "$RAW_DOMAIN")
-  logline "Normalized domain: ${DOMAIN} (original: ${RAW_DOMAIN})"
+  DOMAIN="${3}"
 
   if [[ "${DRUPAL_VERSION}" == "7" ]]; then
     echo "EXECUTING: drush8 ${DRUSH_ALIAS} dis -y --uri=${DOMAIN} letsencrypt_challenge"
