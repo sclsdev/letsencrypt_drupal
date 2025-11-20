@@ -129,6 +129,8 @@ drush_clean_challenge()
   DRUSH_ALIAS="${1}"
   DRUPAL_VERSION="${2}"
   DOMAIN="${3}"
+  
+  local status = drush ${DRUSH_ALIAS} pml --filter='name=letsencrypt_challenge&&status=enabled' --field=status
 
   if [[ "${DRUPAL_VERSION}" == "7" ]]; then
     echo "EXECUTING: drush8 ${DRUSH_ALIAS} dis -y --uri=${DOMAIN} letsencrypt_challenge"
@@ -141,7 +143,7 @@ drush_clean_challenge()
   elif [[ "${DRUPAL_VERSION}" == "9" ]]; then
     echo "EXECUTING: drush9 ${DRUSH_ALIAS} pmu -y --uri=${DOMAIN} letsencrypt_challenge"
     drush9 ${DRUSH_ALIAS} pmu -y --uri=${DOMAIN} letsencrypt_challenge
-  elif [[ "${DRUPAL_VERSION}" == "10" ]]; then
+  elif [[ "${DRUPAL_VERSION}" == "10" && status ]]; then
     echo "EXECUTING: drush ${DRUSH_ALIAS} pmu -y --uri=${DOMAIN} letsencrypt_challenge"
     drush ${DRUSH_ALIAS} pmu -y --uri=${DOMAIN} letsencrypt_challenge
   fi
