@@ -119,8 +119,8 @@ drush_set_challenge()
     drush ${DRUSH_ALIAS} en -y --uri=${DOMAIN} letsencrypt_challenge
     echo "EXECUTING: drush ${DRUSH_ALIAS} sset -y --uri=${DOMAIN} letsencrypt_challenge.challenge \"${TOKEN_VALUE}\""
     echo "$TOKEN_VALUE" | drush ${DRUSH_ALIAS} sset -y --uri=${DOMAIN} letsencrypt_challenge.challenge -
-    echo "EXECUTING: drush ${DRUSH_ALIAS} sset -y --uri=${DOMAIN} letsencrypt_challenge.challenge.${DOMAIN} \"${TOKEN_VALUE}\""
-    echo "$TOKEN_VALUE" | drush ${DRUSH_ALIAS} sset -y --uri=${DOMAIN} letsencrypt_challenge.challenge.${DOMAIN} -
+    echo "EXECUTING: drush ${DRUSH_ALIAS} sset -y --uri=${DOMAIN} letsencrypt_challenge.challenge.${RAW_DOMAIN} \"${TOKEN_VALUE}\""
+    echo "$TOKEN_VALUE" | drush ${DRUSH_ALIAS} sset -y --uri=${DOMAIN} letsencrypt_challenge.challenge.${RAW_DOMAIN} -
   fi
 }
 
