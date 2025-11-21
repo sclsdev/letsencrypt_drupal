@@ -115,12 +115,15 @@ drush_set_challenge()
     echo "EXECUTING: drush9 ${DRUSH_ALIAS} sset -y --uri=${DOMAIN} letsencrypt_challenge.challenge.${DOMAIN} \"${TOKEN_VALUE}\""
     echo "$TOKEN_VALUE" | drush9 ${DRUSH_ALIAS} sset -y --uri=${DOMAIN} letsencrypt_challenge.challenge.${DOMAIN} -
   elif [[ "${DRUPAL_VERSION}" == "10" ]]; then
+    CURRENT=$(drush ${DRUSH_ALIAS} sget --uri=${DOMAIN} letsencrypt_challenge.challenge)
+    NEW="${CURRENT}${TOKEN_VALUE}"
+
     echo "EXECUTING: drush ${DRUSH_ALIAS} en -y --uri=${DOMAIN} letsencrypt_challenge"
     drush ${DRUSH_ALIAS} en -y --uri=${DOMAIN} letsencrypt_challenge
     echo "EXECUTING: drush ${DRUSH_ALIAS} sset -y --uri=${DOMAIN} letsencrypt_challenge.challenge \"${TOKEN_VALUE}\""
-    echo "$TOKEN_VALUE" | drush ${DRUSH_ALIAS} sset -y --uri=${DOMAIN} letsencrypt_challenge.challenge -
-    echo "EXECUTING: drush ${DRUSH_ALIAS} sset -y --uri=${DOMAIN} letsencrypt_challenge.challenge.${DOMAIN} \"${TOKEN_VALUE}\""
-    echo "$TOKEN_VALUE" | drush ${DRUSH_ALIAS} sset -y --uri=${DOMAIN} letsencrypt_challenge.challenge.${DOMAIN} -
+    echo "${TOKEN_VALUE}\n" | drush ${DRUSH_ALIAS} sset -y --uri=${DOMAIN} letsencrypt_challenge.challenge -
+    #echo "EXECUTING: drush ${DRUSH_ALIAS} sset -y --uri=${DOMAIN} letsencrypt_challenge.challenge.${DOMAIN} \"${TOKEN_VALUE}\""
+    #echo "${TOKEN_VALUE}\n" | drush ${DRUSH_ALIAS} sset -y --uri=${DOMAIN} letsencrypt_challenge.challenge.${DOMAIN} -
   fi
 }
 
