@@ -117,8 +117,8 @@ drush_set_challenge()
   elif [[ "${DRUPAL_VERSION}" == "10" ]]; then
     CURRENT=$(drush ${DRUSH_ALIAS} sget --uri=${DOMAIN} letsencrypt_challenge.challenge)
     if [[ -n "$CURRENT" ]]; then
-      # If CURRENT is not empty, append a newline before the new token
-      NEW="${CURRENT}"$'\n'"${TOKEN_VALUE}"
+      # If CURRENT is not empty, append the new token
+      NEW="${CURRENT}""${TOKEN_VALUE}"
     else
       # If CURRENT is empty, just use the new token
       NEW="${TOKEN_VALUE}"
