@@ -92,7 +92,7 @@ main() {
   echo 'BASEDIR="'${CERT_DIR}'"' >> ${FILE_BASECONFIG}
   echo 'HOOK="'${CURRENT_DIR}'/hooks/letsencrypt_drupal_hooks.sh"' >> ${FILE_BASECONFIG}
   echo 'DOMAINS_TXT="'${FILE_DOMAINSTXT}'"' >> ${FILE_BASECONFIG}
-  echo 'HOOK_CHAIN="yes"' >> ${FILE_BASECONFIG}
+  echo 'HOOK_CHAIN="no"' >> ${FILE_BASECONFIG}
   echo 'CONFIG_D="'${DIRECTORY_DEHYDRATED_CONFIG}'"' >> ${FILE_BASECONFIG}
 
   echo "EXECUTING: ${CURRENT_DIR}/dehydrated/dehydrated --config ${FILE_BASECONFIG} --cron --accept-terms"
