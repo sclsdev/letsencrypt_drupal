@@ -86,17 +86,17 @@ main() {
   mkdir -p ${CERT_DIR}
 
   # Generate config and create empty domains.txt
-  echo 'CA="letsencrypt"' > ${FILE_BASECONFIG}
+  echo 'CA="letsencrypt-test"' > ${FILE_BASECONFIG}
   echo 'CHALLENGETYPE="http-01"' >> ${FILE_BASECONFIG}
   echo 'WELLKNOWN="'${TMP_DIR}/wellknown'"' >> ${FILE_BASECONFIG}
   echo 'BASEDIR="'${CERT_DIR}'"' >> ${FILE_BASECONFIG}
   echo 'HOOK="'${CURRENT_DIR}'/hooks/letsencrypt_drupal_hooks.sh"' >> ${FILE_BASECONFIG}
   echo 'DOMAINS_TXT="'${FILE_DOMAINSTXT}'"' >> ${FILE_BASECONFIG}
-  echo 'HOOK_CHAIN="no"' >> ${FILE_BASECONFIG}
+  echo 'HOOK_CHAIN="yes"' >> ${FILE_BASECONFIG}
   echo 'CONFIG_D="'${DIRECTORY_DEHYDRATED_CONFIG}'"' >> ${FILE_BASECONFIG}
 
-  echo "EXECUTING: ${CURRENT_DIR}/dehydrated/dehydrated --config ${FILE_BASECONFIG} --cron --accept-terms --ca letsencrypt-test"
-  DEHYDRATED_RESULT=$(${CURRENT_DIR}/dehydrated/dehydrated --config ${FILE_BASECONFIG} --cron --accept-terms --ca letsencrypt-test 2>&1)
+  echo "EXECUTING: ${CURRENT_DIR}/dehydrated/dehydrated --config ${FILE_BASECONFIG} --cron --accept-terms"
+  DEHYDRATED_RESULT=$(${CURRENT_DIR}/dehydrated/dehydrated --config ${FILE_BASECONFIG} --cron --accept-terms 2>&1)
   if [ $? -eq 0 ]
   then
     # Send result to slack.
