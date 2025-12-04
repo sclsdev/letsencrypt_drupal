@@ -159,7 +159,7 @@ exit_hook() {
   slackpost "${PROJECT_ROOT}" "good" "SSL bot ${DRUSH_ALIAS}" "Starting deactivation & deletion of expired certificates."
 
   # Run certificate deactivation.
-  RESULT=$(php $CURRENT_DIR/../acquia_cloud_cert_deployment/cert_cleanup.php "${CERT_DEPLOY_ENVIRONMENT_UUID}" --deactivate 2>&1)
+  RESULT=$(php $CURRENT_DIR/../acquia_cloud_cert_deployment/cert_cleanup.php "${CERT_DEPLOY_ENVIRONMENT_UUID}" 2>&1)
   if [ $? -eq 0 ]
   then
     # Send successful result to slack.
