@@ -134,7 +134,7 @@ if ($response->getStatusCode() == 202 && $cmd['activate']) {
   if (is_array($certificates)) {
     foreach ($certificates as $cert_id => $cert_label) {
       // $label is the label of currently deployed certificate
-      if ($label === $cert_label) {
+      if ($label === $cert_info['label']) {
         // Request.
         try {
           $api_method = "environments/{$environment_id}/ssl/certificates/{$cert_id}/actions/activate";
