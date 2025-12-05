@@ -75,6 +75,19 @@ cd_or_exit()
 #---------------------------------------------------------------------
 normalize_domain() {
   local domain="$1"
+  
+  # Normalize specific library domains
+  case "$domain" in
+    sunlib.org|www.sunlib.org)
+      echo "www.sunprairiepubliclibrary.org"
+      return
+      ;;
+    baraboopubliclibrary.org|www.baraboopubliclibrary.org)
+      echo "www.csmpl.org"
+      return
+      ;;
+  esac
+
   # If it's a root domain (no subdomain), prepend "www."
   if [[ "$domain" != *.*.* ]]; then
     echo "www.${domain}"
