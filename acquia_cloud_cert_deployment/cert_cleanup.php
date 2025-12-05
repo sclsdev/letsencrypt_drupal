@@ -18,10 +18,18 @@ list($environment_id) = $cmd;
 
 $secrets = extract_secrets($cmd);
 $base_url = 'https://cloud.acquia.com/api/';
+
+// See https://docs.acquia.com/cloud-platform/develop/api/auth/
+// for how to generate a client ID and Secret.
+$clientId = $secrets['token'];
+$clientSecret = $secrets['secret'];
+
 $provider = new GenericProvider([
-  'clientId' => $secrets['token'],
-  'clientSecret' => $secrets['secret'],
-  'urlAccessToken' => 'https://accounts.acquia.com/api/auth/oauth/token',
+  'clientId'                => $clientId,
+  'clientSecret'            => $clientSecret,
+  'urlAuthorize'            => '',
+  'urlAccessToken'          => 'https://accounts.acquia.com/api/auth/oauth/token',
+  'urlResourceOwnerDetails' => '',
 ]);
 
 $accessToken = $provider->getAccessToken('client_credentials');
