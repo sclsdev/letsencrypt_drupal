@@ -31,7 +31,7 @@ self_update() {
     reslog=$(git log HEAD..origin/main --oneline)
     if [[ "${reslog}" != "" ]]; then
         echo "Found a new version of me, updating myself..."
-        slackpost "${PROJECT_ROOT}" "warning" "Sclsdev/letsencrypt_drupal on ${DRUSH_ALIAS}" "Found a new version of me, updating myself..."
+        slackpost "${PROJECT_ROOT}" "warning" "Sclsdev/letsencrypt_drupal on ${DRUSH_ALIAS}" "On ${DRUSH_ALIAS}. Found a new version of me, updating myself..."
 
         # Remove dehydrated library to make sure we get new version.
         rm -rf ${CURRENT_DIR}/dehydrated
