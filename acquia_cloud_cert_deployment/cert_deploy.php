@@ -132,7 +132,7 @@ if ($response->getStatusCode() == 202 && $cmd['activate']) {
   // Activate it
   // Loop through the certificates, get ID of the one which has the same Label as the current one
   if (is_array($certificates)) {
-    foreach ($certificates as $cert_id => $cert_label) {
+    foreach ($certificates as $cert_id => $cert_info) {
       // $label is the label of currently deployed certificate
       if ($label === $cert_info['label']) {
         // Request.
