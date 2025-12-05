@@ -39,15 +39,17 @@ $certificates = get_deployed_certificates($environment_id, $client, $base_url, $
 $now = new DateTimeImmutable('now', new DateTimeZone('UTC'));
 
 foreach ($certificates as $cert_id => $meta) {
-  if (!empty($meta['expires_at']) && $meta['active'] === true) {
+  if (!empty($meta['expires_at'])) {
     $expires_at = new DateTimeImmutable($meta['expires_at'], new DateTimeZone('UTC'));
     if ($expires_at < $now) {
+      print "Cleaning up {$meta['label']}\n";
       try {
         // Deactivate
-        $api_method = "environments/{$environment_id}/ssl/certificates/{$cert_id}/actions/deactivate";
-        $resp = $client->send($provider->getAuthenticatedRequest('POST', $base_url . $api_method, $accessToken, []));
-        print_response_message($resp->getBody(), $cmd);
-
+        if ($meta['active'] === true){
+          $api_method = "environments/{$environment_id}/ssl/certificates/{$cert_id}/actions/deactivate";
+          $resp = $client->send($provider->getAuthenticatedRequest('POST', $base_url . $api_method, $accessToken, []));
+          print_response_message($resp->getBody(), $cmd);
+        }
         // Delete
         $delete_method = "environments/{$environment_id}/ssl/certificates/{$cert_id}";
         $del_resp = $client->send($provider->getAuthenticatedRequest('DELETE', $base_url . $delete_method, $accessToken, []));
