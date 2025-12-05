@@ -39,8 +39,8 @@ $certificates = get_deployed_certificates($environment_id, $client, $base_url, $
 $now = new DateTimeImmutable('now', new DateTimeZone('UTC'));
 
 foreach ($certificates as $cert_id => $meta) {
-  // refresh token if needed
-  $accessToken = getAccessToken($provider, $accessToken);
+    // Refresh token if needed
+    $accessToken = ensureAccessToken($provider, $accessToken);
   
   if (!empty($meta['expires_at'])) {
     $expires_at = new DateTimeImmutable($meta['expires_at'], new DateTimeZone('UTC'));
@@ -63,4 +63,15 @@ foreach ($certificates as $cert_id => $meta) {
       }
     }
   }
+}
+
+/**
+ * Refresh the access token if needed
+ */
+function ensureAccessToken(GenericProvider $provider, \League\OAuth2\Client\Token\AccessToken $currentToken) {
+    // Refresh if token expires in less than 60 seconds
+    if ($currentToken->getExpires() - time() < 60) {
+        return $provider->getAccessToken('client_credentials');
+    }
+    return $currentToken;
 }
