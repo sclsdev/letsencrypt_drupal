@@ -32,13 +32,16 @@ $provider = new GenericProvider([
   'urlResourceOwnerDetails' => '',
 ]);
 
-$accessToken = $provider->getAccessToken('client_credentials');
+$accessToken = null;
 $client = new Client();
 
 $certificates = get_deployed_certificates($environment_id, $client, $base_url, $cmd, $provider, $accessToken);
 $now = new DateTimeImmutable('now', new DateTimeZone('UTC'));
 
 foreach ($certificates as $cert_id => $meta) {
+  // refresh token if needed
+  $accessToken = getAccessToken($provider, $accessToken);
+
   if (!empty($meta['expires_at'])) {
     $expires_at = new DateTimeImmutable($meta['expires_at'], new DateTimeZone('UTC'));
     if ($expires_at < $now) {
